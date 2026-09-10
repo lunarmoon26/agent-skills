@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/lunarmoon26/agent-skill-runtime/main/skill-runtime.schema.json",
+  "manifestVersion": 1,
+  "name": "photo-processing",
+  "tools": [
+    {
+      "title": "Process Photos",
+      "name": "photo_process",
+      "description": "Inspect, resize, convert, mask, trim, recolor, flood-fill, or split images with the bundled photo CLI. Pass the documented CLI arguments as separate tokens; no shell is invoked.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "enum": ["inspect", "resize", "key-color", "flood-fill", "key-luminance", "mask", "trim", "sprite-grid"],
+            "description": "Photo operation to run"
+          },
+          "arguments": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Arguments after the command, with each path, flag, and value as a separate item"
+          }
+        },
+        "required": ["command", "arguments"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "command": { "type": "string" },
+          "messages": { "type": "array", "items": { "type": "string" } },
+          "records": { "type": "array", "items": {} }
+        },
+        "required": ["ok", "command", "messages", "records"],
+        "additionalProperties": false
+      },
+      "entrypoint": {
+        "engine": "python-uv",
+        "path": "scripts/tool.py"
+      },
+      "capabilities": ["filesystem-read", "filesystem-write"],
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "limits": {
+        "timeoutMs": 600000,
+        "maxInputBytes": 1048576,
+        "maxOutputBytes": 4194304
+      }
+    }
+  ]
+}

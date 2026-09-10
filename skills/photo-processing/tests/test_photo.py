@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # pyright: reportMissingImports=false
 import importlib.util
+import json
 import subprocess
 import sys
 import tempfile
@@ -11,6 +12,7 @@ from pathlib import Path
 from PIL import Image
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "photo.py"
+TOOL_SCRIPT = Path(__file__).parents[1] / "scripts" / "tool.py"
 SPEC = importlib.util.spec_from_file_location("photo", SCRIPT)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"Could not import {SCRIPT}")
@@ -150,6 +152,25 @@ class FloodFillColorTests(unittest.TestCase):
             second_run = subprocess.run(command, capture_output=True, text=True, check=False)
             self.assertEqual(second_run.returncode, 2)
             self.assertIn("output exists; pass --overwrite", second_run.stderr)
+
+    def test_json_tool_bridge_returns_structured_inspection(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            source = Path(temporary_directory) / "sample.png"
+            Image.new("RGBA", (3, 2), (1, 2, 3, 4)).save(source)
+
+            result = subprocess.run(
+                [sys.executable, str(TOOL_SCRIPT)],
+                input=json.dumps({"command": "inspect", "arguments": [str(source)]}),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["command"], "inspect")
+            self.assertEqual(payload["records"][0]["size"], [3, 2])
+            self.assertEqual(payload["records"][0]["format"], "PNG")
 
 
 if __name__ == "__main__":

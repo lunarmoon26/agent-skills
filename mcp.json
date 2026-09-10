@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "photo-processing": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@lunarmoon26/agent-skill-runtime@0.1.0",
+        "mcp",
+        "--root",
+        "${PLUGIN_ROOT}",
+        "--manifest",
+        "skills/photo-processing/skill-runtime.json",
+        "--allow",
+        "filesystem-write"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

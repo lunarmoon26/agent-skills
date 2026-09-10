@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.11,<3.15"
+# dependencies = [
+#   "Pillow==12.3.0",
+# ]
+# ///
 # pyright: reportMissingImports=false
 """Non-destructive image resizing, transparency, icon, and sprite-sheet tools.
 
-Run with Pillow supplied by uv:
-    uv run --with pillow python photo.py --help
+Run with the pinned Pillow version supplied by uv:
+    uv run --script photo.py --help
 """
 
 from __future__ import annotations

@@ -36,5 +36,5 @@ bunx skills add . --list
 Run the narrowest available test for modified scripts or fixtures. For example:
 
 ```sh
-uv run --with pillow --with pytest pytest skills/photo-processing/tests/test_photo.py
+uv run --with 'pillow==12.3.0' --with pytest pytest skills/photo-processing/tests/test_photo.py
 ```

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "lunarmoon26-agent-skills",
+  "version": "0.1.0",
+  "description": "Portable engineering, technical writing, and media-processing skills for coding agents.",
+  "author": {
+    "name": "lunarmoon26",
+    "url": "https://github.com/lunarmoon26"
+  },
+  "homepage": "https://github.com/lunarmoon26/agent-skills#readme",
+  "repository": "https://github.com/lunarmoon26/agent-skills",
+  "keywords": ["agent-skills", "engineering", "photo-processing", "mcp"]
+}
