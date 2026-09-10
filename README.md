@@ -22,4 +22,4 @@ bunx skills add lunarmoon26/agent-skills
 - `research-driven-development`
 - `tech-breakdown-in-chinese`
 
-Each skill is self-contained in its own directory, with scripts, references, tests, or eval fixtures where needed.
+Each skill lives in `skills/<skill-name>/`, with scripts, references, tests, or eval fixtures where needed.
