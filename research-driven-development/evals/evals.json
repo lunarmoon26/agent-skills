@@ -1,0 +1,39 @@
+{
+  "skill_name": "research-driven-development",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Our TypeScript workflow engine needs durable pause and resume. Compare how Temporal, Inngest, and Trigger.dev implement this, but first inspect our existing job state and tests. The repository is not attached to this eval, so state what local access you need before starting the comparison. Recommend what to adopt or adapt without giving me a feature-list comparison.",
+      "expected_output": "Does not invent the unavailable local baseline or start a detached feature comparison. Requests the repository path or the relevant job-state implementation and tests, explains how that evidence will set criteria, and only then proposes selecting relevant source versions and tracing persistence, dispatch, retry, cancellation, and recovery mechanisms into source and tests with strengths, weaknesses, transfer risk, and remaining validation.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Using the attached repository fixture, investigate why this service can deliver the same webhook twice. Trace the local code and tests before proposing a fix; only search external projects if the local evidence leaves a design choice unresolved.",
+      "expected_output": "Uses a focused local deep dive rather than an automatic landscape survey, traces the webhook from entry point through state, side effects, retries, and tests, distinguishes observed behavior from inference, identifies the discriminating gap, and uses external research only if it can change the fix.",
+      "files": [
+        "evals/fixtures/webhook-repo/README.md",
+        "evals/fixtures/webhook-repo/webhook.ts",
+        "evals/fixtures/webhook-repo/webhook.test.ts"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Research how strong open-source CLI projects support configuration precedence so we can decide whether flags, environment variables, and config files should share one resolver. Keep anything durable in our existing design docs.",
+      "expected_output": "Frames configuration precedence criteria from the current repository, drills into a small high-signal source set and their tests, compares mechanisms and failure behavior, recommends a bounded local pattern, and routes any durable conclusion into existing canonical documentation instead of creating mandatory research files.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Look up the current Prettier 3 CLI command for checking all files in the current directory without writing changes, and tell me what it is.",
+      "expected_output": "Treats this as a simple primary-documentation lookup, does not run the multi-source research workflow, and returns the verified Prettier 3 check command with its official source.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Write a lightweight architecture overview for our already-understood single-process service. No external comparison is needed.",
+      "expected_output": "Routes architecture authoring to lightweight-architecture and does not introduce repository research phases, source tracking, or a comparative research memo.",
+      "files": []
+    }
+  ]
+}

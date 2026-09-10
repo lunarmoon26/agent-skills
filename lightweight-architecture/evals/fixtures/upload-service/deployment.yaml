@@ -1,0 +1,9 @@
+services:
+  api:
+    queue: uploads
+    object_store: uploads-private
+  worker:
+    queue: uploads
+    scanner_endpoint: http://scanner.internal
+    database: uploads-postgres
+    event_bus: product-events

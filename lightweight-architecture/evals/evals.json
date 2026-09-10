@@ -1,0 +1,42 @@
+{
+  "skill_name": "lightweight-architecture",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Using the attached fixture and its existing SYSTEM_DESIGN.md owner, create a lightweight architecture overview for the upload service. Determine what exact evidence exists for trust boundaries and completion-event recovery behavior; identify missing evidence and keep unimplemented remediation clearly proposed. Do not produce a twelve-section template.",
+      "expected_output": "Inspects existing repository conventions and cites exact artifact evidence, identifies that completion-event recovery is not implemented or tested in the fixture, and writes a compact current or proposed brief with purpose, scope, top quality scenarios, constraints, context and interfaces, level-one responsibilities, critical upload/failure/recovery flows, deployment or trust boundaries, risks, and links to decisions while clearly separating implemented behavior from proposals.",
+      "files": [
+        "evals/fixtures/upload-service/README.md",
+        "evals/fixtures/upload-service/SYSTEM_DESIGN.md",
+        "evals/fixtures/upload-service/upload_service.py",
+        "evals/fixtures/upload-service/test_upload_service.py",
+        "evals/fixtures/upload-service/conftest.py",
+        "evals/fixtures/upload-service/deployment.yaml"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We need to choose PostgreSQL advisory locks or a Redis lease for cross-process job ownership. Record the decision and how we will know the implementation conforms.",
+      "expected_output": "Treats the choice as architecturally significant, inspects local constraints and existing decision conventions, creates one concise proposed ADR with context, drivers, both options, rationale, positive and negative consequences, confirmation evidence, and links, then identifies architecture and implementation owners that must synchronize after acceptance.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "ADR 0007 accepted a shared database, but new regulatory isolation requirements mean each tenant now needs a separate database. Update the old ADR so it says we always intended that.",
+      "expected_output": "Refuses to rewrite the meaning of the accepted record, creates a new proposed ADR with the changed context and migration consequences, marks ADR 0007 superseded only after acceptance with a link to the replacement, and updates the current architecture and focused data contracts separately.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "We renamed a private helper and moved it into a neighboring source file. Should we create an ADR?",
+      "expected_output": "Skips the ADR because the choice is local, low-risk, reversible, and carries no meaningful architectural rationale; recommends ordinary code review and tests only.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Before writing any architecture, compare the internals and tests of five open-source event stores and determine which patterns transfer to our codebase.",
+      "expected_output": "Routes the comparative source investigation to research-driven-development, preserving lightweight-architecture for the later current model and significant decisions rather than starting with a template or unsupported recommendation.",
+      "files": []
+    }
+  ]
+}

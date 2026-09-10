@@ -1,0 +1,42 @@
+{
+  "skill_name": "document-driven-development",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add idempotency keys to our existing payments API. The OpenAPI schema, API guide, implementation, and tests all exist. Work documentation-first, include migration and failure behavior, then close the loop without creating a generic PLAN.md.",
+      "expected_output": "Inspects existing owners, treats OpenAPI as the exact shape owner and the focused API guide as the behavior owner, documents the bounded delta and acceptance criteria before broad implementation, maps tests and migration evidence, reconciles discoveries, and avoids a duplicate plan or architecture document.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Start a tiny single-command Rust CLI from this mostly empty repository using document-driven development. Keep it agile; it only reads one local file and prints a summary.",
+      "expected_output": "Bootstraps only useful content such as README purpose, usage, and observable acceptance behavior, avoids empty principles/architecture/decision/roadmap files, implements the smallest contract, and adds verification proportional to the simple local tool.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Using the attached fixture, reconcile its retry policy. The JSON schema, focused specification, tests, implementation, old rollout plan, and AGENTS.md disagree.",
+      "expected_output": "Classifies authority by fact type, treats the mismatch as drift, investigates intended behavior rather than preferring recency, updates the machine and focused behavior owners coherently, removes or moves stale plan content, keeps AGENTS.md as routing rather than another product contract, and reports semantic plus structural validation.",
+      "files": [
+        "evals/fixtures/retry-drift/retry.schema.json",
+        "evals/fixtures/retry-drift/RETRY_SPEC.md",
+        "evals/fixtures/retry-drift/retry.ts",
+        "evals/fixtures/retry-drift/retry.test.ts",
+        "evals/fixtures/retry-drift/ROLLOUT_PLAN.md",
+        "evals/fixtures/retry-drift/AGENTS.md"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Fix a spelling mistake in one README paragraph. No command, behavior, API, or workflow changes.",
+      "expected_output": "Performs the bounded prose correction without inventing a feature contract, architecture record, requirement matrix, or document-driven ceremony.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Make main.md the source code for this project and regenerate every implementation file from it because document-driven development always requires that pattern.",
+      "expected_output": "Rejects the premise that document-driven development universally makes Markdown executable source, inspects whether the repository explicitly adopted a generated-code model, and requires clear regeneration, review, ownership, and independent-test rules before using that optional pattern.",
+      "files": []
+    }
+  ]
+}
