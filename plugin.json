@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "lunarmoon26-agent-skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Portable engineering, technical writing, and media-processing skills for coding agents.",
   "author": {
     "name": "lunarmoon26",
