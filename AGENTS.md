@@ -10,8 +10,9 @@ skills/
     SKILL.md
     scripts/       # optional helper programs
     references/    # optional supporting material
+    assets/        # optional templates and static resources
     tests/         # optional focused tests
-    evals/         # optional evaluation fixtures
+    evals/         # optional development evaluations documented by agentskills.io
 ```
 
 - Use a lowercase kebab-case directory name.
@@ -24,6 +25,7 @@ skills/
 - Keep `SKILL.md` focused. Put detailed guidance in `references/` and deterministic work in `scripts/`.
 - Do not hard-code user names, home directories, or platform-specific installation paths.
 - Prefer scripts only when they provide a repeatable result; document required runtimes, inputs, outputs, and failure behavior.
+- Add `skill-runtime.json` only when a skill exposes a deterministic JSON tool. Prose-only workflow skills do not need artificial runtime wrappers.
 
 ## Validation
 
