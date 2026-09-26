@@ -40,6 +40,7 @@ the layout documented by the official Agent Skills evaluation guide.
 
 - `document-driven-development`
 - `lightweight-architecture`
+- `llm-wiki-review`
 - `photo-processing`
 - `research-driven-development`
 - `tech-breakdown-in-chinese`
