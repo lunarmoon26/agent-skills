@@ -51,6 +51,45 @@
         "maxInputBytes": 1048576,
         "maxOutputBytes": 4194304
       }
+    },
+    {
+      "title": "Edit Layered Images with PhotoCraft",
+      "name": "photocraft",
+      "description": "Inspect layered documents, discover engine commands, edit PSD/PSB/native documents, convert, or batch actions with separately installed photocraft-cli on PATH. CLI arguments are separate tokens; no shell is invoked. Can overwrite files; commands/actions may write beyond --out. Review trusted commands and authorized paths first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string", "enum": ["info", "commands", "convert", "run", "batch"] },
+          "arguments": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Native CLI tokens following the subcommand; keep each JSON params value in one string"
+          }
+        },
+        "required": ["command", "arguments"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "command": { "type": "string" },
+          "messages": { "type": "array", "items": { "type": "string" } },
+          "records": { "type": "array", "items": {} },
+          "warnings": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["ok", "command", "messages", "records", "warnings"],
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "python-uv", "path": "scripts/photocraft_tool.py" },
+      "capabilities": ["filesystem-read", "filesystem-write", "process"],
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "limits": { "timeoutMs": 600000, "maxInputBytes": 1048576, "maxOutputBytes": 4194304 }
     }
   ]
 }
