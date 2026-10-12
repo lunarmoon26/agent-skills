@@ -1,12 +1,18 @@
 ---
 name: photo-processing
-description: Use when the user wants to resize, crop, convert, optimize, recolor, mask, flood fill, use a Magic Wand-style contiguous color selection, make image backgrounds transparent, create transparent icon assets, split a sprite sheet, calculate icon crop offsets, or generate CSS sprite positions for PNG, JPEG, WebP, AVIF, TIFF, BMP, GIF, or ICO files. Use this skill for image/photo/texture/icon asset editing, including when the user does not name a file format.
-compatibility: Requires `uv`; bundled scripts pin Pillow with PEP 723 metadata.
+description: Use for photo, image, texture, and icon editing, including Photoshop-style layered PSD/PSB editing, adjustment layers, filters, masks, compositing, and batch actions with PhotoCraft CLI; or resize, crop, convert, optimize, recolor, flood fill, background transparency, sprite splitting, and CSS sprite geometry with the bundled Pillow tools. Trigger even when the user does not name a file format. For Illustrator-style vector illustration, see the VectorCraft handoff.
+compatibility: Bundled tools require uv and Python 3.11–3.14; advanced editing additionally requires photocraft-cli on PATH. Pillow is pinned with PEP 723 metadata.
 ---
 
 # Photo Processing
 
-Use the bundled script for deterministic, non-destructive image work. It writes a suffixed file by default and refuses to replace an existing file unless `--overwrite` is explicit.
+Choose the smallest engine that preserves the user's editing intent:
+
+- **Pillow (`photo.py` / `photo_process`)**: flat-image resizing, transparency, flood fill, icon normalization, and sprite geometry. It writes a suffixed file by default and refuses to replace an existing file unless `--overwrite` is explicit.
+- **PhotoCraft (`photocraft-cli` / `photocraft`)**: layered documents, PSD/PSB, adjustment layers, selections/masks, type, filters, compositing, and recorded batch actions. Keep an editable master and export a separate preview/delivery image. Read [the PhotoCraft workflow](references/photocraft.md) before using it.
+- **VectorCraft**: Illustrator-style paths, Bézier editing, vector booleans, artboards, and SVG/vector deliverables. See [the vector handoff](references/photocraft.md#vectorcraft-handoff); do not flatten a vector master just to use the raster tools.
+
+PhotoCraft is early alpha, not a guaranteed professional Photoshop replacement. Inspect imports and rendered exports; do not infer fidelity from a successful exit code.
 
 Set `PHOTO_SCRIPT` to this skill's bundled `scripts/photo.py` file, then use it in each command:
 
@@ -21,7 +27,7 @@ Inspect before choosing geometry or an output format:
 uv run --script "$PHOTO_SCRIPT" inspect path/to/image.png
 ```
 
-Hosts that support executable skills may call `photo_process` from `skill-runtime.json`. Pass the same subcommand in `command` and every following CLI token as a separate string in `arguments`; the bridge never invokes a shell. Run the repository's documented runtime `prepare` command once before the first tool call so later `uv` execution stays offline.
+Hosts that support executable skills may call `photo_process` or `photocraft` from `skill-runtime.json`. Both accept `command` plus `arguments` (each following CLI token as a separate string); neither bridge invokes a shell. Run the repository's documented runtime `prepare` command once before the first tool call so later `uv` execution stays offline. PhotoCraft is a separately installed native executable, not a Python dependency; its bridge requires the runtime's `process` and filesystem capabilities. It returns stdout as `messages`, parsed JSON as `records`, and stderr as `warnings`; CLI failures exit nonzero, not as successful results. Long-lived `mcp`/`serve` commands are not exposed through this one-shot tool.
 
 The script preserves EXIF orientation. It rejects animated inputs unless `--first-frame` is specified, avoiding accidental animation loss. Alpha cannot survive JPEG or BMP export; select `png`, `webp`, `avif`, or `tiff` for transparent output.
 
@@ -124,6 +130,7 @@ Use the annotated `--preview` to adjust origin, cell size, and gaps before commi
 ## Working Rules
 
 - Keep source assets unchanged. Write outputs beside the source with a suffix or into a project asset directory.
+- PhotoCraft's raw CLI can replace existing destinations without confirmation, and engine commands/actions can write paths beyond `--out`. Review all commands, parameters, actions, and destinations first. The bridge is not a filesystem sandbox or an overwrite guard.
 - Use PNG, WebP, or AVIF when subsequent steps need transparency. JPEG/BMP exports flatten alpha onto `--background` (white by default).
 - Use a high-resolution source for ICO files; the script writes each requested `--ico-sizes` resolution.
 - State input and output paths plus output dimensions/formats in the final response. Mention any visual tuning that still needs human approval.

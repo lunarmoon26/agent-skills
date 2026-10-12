@@ -1,0 +1,35 @@
+{
+  "skill_name": "vector-illustration",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create an original dusk landscape poster like the scenario in VectorCraft's examples: layered mountains, sunset sky, a sun, sparse stars, and editable headline text. Deliver native, SVG, and PNG without copying their artwork.",
+      "expected_output": "Uses purposeful depth bands and discovered gradient/path/text commands, keeps editable typography and a native master, inspects fonts and exports, and visually checks composition at delivery size. Does not claim an unviewed or browser-untested SVG is verified.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Make an editable illustration with colored ribbons, a radial mandala, softly mesh-shaded objects, and a warped label on separate artboards. Keep those features live for later edits.",
+      "expected_output": "Discovers blend, repeat, gradient mesh and envelope schemas; differentiates shading mesh from envelope mesh; retains live native objects, reopens to verify their kinds, and exports/inspects every artboard. Does not merely flatten everything into paths and call the native mechanisms editable.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build an original neon city poster with a striped sun, glowing title/grid, clipped overflow, and buildings with windows on two perspective planes.",
+      "expected_output": "Establishes composition and two-point perspective, uses deliberate plane attachments and path subtraction/clip order, adds glow after solid geometry, keeps a native master, and checks each delivery format for rasterized effects and font substitutions.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Recreate my detailed cel-animation frame of a purple mechanical figure surrounded by green gantry machinery as closely as possible with vectors, not a simplified icon. No image is attached to this evaluation: explain what input you need before constructing measured geometry.",
+      "expected_output": "Requests the missing reference rather than fabricating dimensions or a measured reconstruction. Once supplied, follows intrinsic-size landmarks, layered silhouettes and occlusions, hard shadow/highlight patches, mechanical details, same-size renders and overlay/difference iteration; keeps source pixels out of the final vector delivery and reports residual mismatches without inventing a similarity percentage.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Change the blue outline of this SVG icon to red. Preserve its geometry and IDs.",
+      "expected_output": "Makes a targeted source-level stroke edit, preserves viewBox/path/ID, avoids a VectorCraft round trip for a one-attribute edit, and renders/checks the result when a viewer is available.",
+      "files": ["tests/fixtures/mountains.svg"]
+    }
+  ]
+}

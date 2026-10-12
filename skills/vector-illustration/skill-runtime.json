@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/lunarmoon26/agent-skill-runtime/main/skill-runtime.schema.json",
+  "manifestVersion": 1,
+  "name": "vector-illustration",
+  "tools": [
+    {
+      "title": "Create and Edit Vector Art with VectorCraft",
+      "name": "vectorcraft",
+      "description": "Discover commands, inspect, create/edit vector documents, or convert SVG/native artwork with separately installed vectorcraft-cli on PATH. Pass native CLI arguments as separate tokens; no shell is invoked. Commands can overwrite files and write beyond --export. Review commands, warnings, and authorized paths; each run starts a fresh session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string", "enum": ["commands", "info", "run", "convert"] },
+          "arguments": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Native CLI tokens following the subcommand; keep each JSON params value in one string"
+          }
+        },
+        "required": ["command", "arguments"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "command": { "type": "string" },
+          "messages": { "type": "array", "items": { "type": "string" } },
+          "records": { "type": "array", "items": {} },
+          "warnings": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["ok", "command", "messages", "records", "warnings"],
+        "additionalProperties": false
+      },
+      "entrypoint": { "engine": "python-uv", "path": "scripts/tool.py" },
+      "capabilities": ["filesystem-read", "filesystem-write", "process"],
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "limits": { "timeoutMs": 600000, "maxInputBytes": 1048576, "maxOutputBytes": 4194304 }
+    }
+  ]
+}

@@ -13,7 +13,27 @@
         "--manifest",
         "skills/photo-processing/skill-runtime.json",
         "--allow",
-        "filesystem-write"
+        "filesystem-write",
+        "--allow",
+        "process"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    },
+    "vector-illustration": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@lunarmoon26/agent-skill-runtime@0.1.1",
+        "mcp",
+        "--root",
+        "${PLUGIN_ROOT}",
+        "--manifest",
+        "skills/vector-illustration/skill-runtime.json",
+        "--allow",
+        "filesystem-write",
+        "--allow",
+        "process"
       ],
       "cwd": "${PLUGIN_ROOT}"
     }
