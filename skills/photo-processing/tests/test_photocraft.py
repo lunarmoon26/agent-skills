@@ -10,6 +10,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from PIL import Image
+
 SCRIPT = Path(__file__).parents[1] / "scripts" / "photocraft_tool.py"
 SPEC = importlib.util.spec_from_file_location("photocraft_tool", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
@@ -82,6 +84,69 @@ class LiveCliTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         return json.loads(result.stdout)
+
+    def test_asset_editing_replacements(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.png"
+            output = root / "output.png"
+            image = Image.new("RGBA", (8, 6))
+            for x in range(2, 5):
+                for y in range(1, 3):
+                    image.putpixel((x, y), (20, 30, 40, 128))
+            image.save(source)
+            info = self.call("info", [str(source), "--compact"])["records"][0]
+            self.assertEqual((info["width"], info["height"]), (8, 6))
+            self.call("run", [str(source), "--cmd", "image.trim",
+                              "--params", '{"basedOn":"transparent"}', "--out", str(output)])
+            with Image.open(output) as result:
+                self.assertEqual(result.size, (3, 2))
+                self.assertEqual(result.convert("RGBA").getpixel((1, 1))[3], 128)
+            self.call("run", [str(source), "--cmd", "edit.fill", "--params",
+                              '{"contents":"color","color":"#112233","preserveTransparency":true}',
+                              "--out", str(root / "recolored.png")])
+            with Image.open(root / "recolored.png") as result:
+                result = result.convert("RGBA")
+                self.assertEqual(result.getpixel((3, 2)), (17, 34, 51, 128))
+                self.assertEqual(result.getpixel((0, 0))[3], 0)
+
+    def test_bucket_and_color_to_alpha_replacements(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.png"
+            image = Image.new("RGBA", (3, 1))
+            image.putdata([(0, 0, 0, 255), (0, 0, 0, 255), (255, 255, 255, 255)])
+            image.save(source)
+            self.call("run", [str(source), "--cmd", "paint.bucket", "--params",
+                              '{"x":0,"y":0,"tolerance":0,"contiguous":true,"antiAlias":false,"color":"#112233"}',
+                              "--out", str(root / "filled.png")])
+            with Image.open(root / "filled.png") as result:
+                self.assertEqual(list(result.convert("RGBA").get_flattened_data()),
+                                 [(17, 34, 51, 255), (17, 34, 51, 255), (255, 255, 255, 255)])
+            self.call("run", [str(source), "--cmd", "filter.other.colorToAlpha",
+                              "--params", '{"color":"#000000"}', "--out", str(root / "keyed.png")])
+            with Image.open(root / "keyed.png") as result:
+                self.assertEqual(list(result.convert("RGBA").getchannel("A").get_flattened_data()),
+                                 [0, 0, 255])
+
+    def test_contiguous_background_removal_keeps_enclosed_region(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.png"
+            image = Image.new("RGBA", (7, 7), (0, 0, 0, 255))
+            for coordinate in range(2, 5):
+                for point in [(coordinate, 2), (coordinate, 4), (2, coordinate), (4, coordinate)]:
+                    image.putpixel(point, (255, 255, 255, 255))
+            image.save(source)
+            output = root / "cleared.png"
+            self.call("run", [str(source), "--cmd", "select.magicWand", "--params",
+                              '{"x":0,"y":0,"tolerance":0,"contiguous":true,"antiAlias":false}',
+                              "--cmd", "edit.clear", "--cmd", "select.deselect", "--out", str(output)])
+            with Image.open(output) as result:
+                result = result.convert("RGBA")
+                self.assertEqual(result.getpixel((0, 0))[3], 0)
+                self.assertEqual(result.getpixel((3, 3)), (0, 0, 0, 255))
+                self.assertEqual(result.getpixel((3, 2)), (255, 255, 255, 255))
 
     def test_layered_master_preview_and_batch(self):
         with tempfile.TemporaryDirectory() as directory:

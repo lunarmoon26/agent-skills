@@ -17,6 +17,7 @@ bunx skills add lunarmoon26/agent-skills
 ## Executable tools
 
 The repository is also an [Agent Plugins 1.0](https://agent-plugins.org/) package. Its `photo_process`, `photocraft`, and `vectorcraft` MCP tools use [`@lunarmoon26/agent-skill-runtime`](https://github.com/lunarmoon26/agent-skill-runtime) with the manifests in `skills/photo-processing/` and `skills/vector-illustration/`.
+`photo_process` is limited to batch resizing/ICO export, luminance-to-alpha, and sprite extraction; inspection and general image editing use `photocraft`. Removed Pillow commands and their migration paths are documented in `skills/photo-processing/references/photocraft.md`.
 The MCP bridge requires Node.js 22.20 or newer; executable tools use `uv`
 and Python 3.11 through 3.14. Native editing additionally requires the corresponding `photocraft-cli` or `vectorcraft-cli` installed on PATH; runtime preparation does not install these binaries.
 

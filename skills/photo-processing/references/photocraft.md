@@ -47,6 +47,50 @@ This guide was checked against installed CLI `0.8.2 (d43db3e15, 2026-10-12)` and
 
 4. View the exported preview with the harness's image viewer. Check dimensions, intended changes, alpha edges, text/fonts, layer/mask behavior, and import/export warnings. Compare with a baseline render for fidelity-sensitive edits. A saved PSD need not be byte-identical or render exactly like Photoshop; do not promise lossless interchange. Preserve the original.
 
+## Migration from the bundled photo CLI
+
+`photo_process` and `photo.py` expose only `resize`, `key-luminance`, and `sprite-grid`. The standalone `inspect`, `key-color`, `flood-fill`, `mask`, and `trim` operations are removed without compatibility aliases. Update saved tool requests and scripts; unsupported commands fail nonzero. PhotoCraft is now required for these general editing workflows. The remaining Pillow code is for specialized asset packaging, explicit luminance/alpha normalization, and sprite metadata—not an alternative editing engine.
+
+| Removed command | PhotoCraft workflow | Important difference |
+| --- | --- | --- |
+| `inspect` | `photocraft-cli info input.png --compact` | Document/layer info, not the previous Pillow `size`/`frames` record schema; inspect animation separately when relevant |
+| `key-color` | `filter.other.colorToAlpha` | Thresholds are 0–1, not the old RGB-distance tolerance/feather; color decontamination can change RGB |
+| `flood-fill` | `paint.bucket` for color; `select.magicWand` → `edit.clear` for transparent removal | No documented match/ignore-alpha or 4/8 connectivity switches; do not translate old tolerance/alpha settings as equivalent |
+| `mask` | `edit.fill` with `preserveTransparency` for silhouette recoloring | Preserves existing alpha; does not implicitly derive alpha from luminance. Use retained `key-luminance` explicitly for luminance-derived alpha and verify its differing transfer function. Former `--alpha-source inverse-luminance` and `--opacity` have no drop-in migration here; construct and verify an explicit native mask/opacity workflow instead |
+| `trim` | `image.trim` → `image.canvasSize` for padding/square canvas | Inspect dimensions after trim, then calculate canvas size; sprite-grid still trims its own cuts internally |
+
+Discover these command schemas on the installed build before use. The following examples target a flat PNG's active pixel layer. For layered/locked-background inputs, inspect and target/unlock the appropriate layer first; never apply these examples indiscriminately to every layer. Every output path must be fresh or explicitly approved for replacement: PhotoCraft does not inherit Pillow's overwrite guard.
+
+```sh
+# Replace a seed-connected color region. Coordinates must be measured from the input.
+photocraft-cli run input.png --cmd paint.bucket \
+  --params '{"x":0,"y":0,"tolerance":0,"contiguous":true,"antiAlias":false,"color":"#112233"}' \
+  --out filled.png
+
+# Remove only the seed-connected backdrop, not enclosed matching-color regions.
+photocraft-cli run input.png --cmd select.magicWand \
+  --params '{"x":0,"y":0,"tolerance":0,"contiguous":true,"antiAlias":false}' \
+  --cmd edit.clear --cmd select.deselect --out transparent.png
+
+# Remove a known background color globally; inspect fringes/RGB afterward.
+photocraft-cli run input.png --cmd filter.other.colorToAlpha \
+  --params '{"color":"#000000"}' --out keyed.png
+
+# Recolor an existing alpha silhouette without flattening its transparency.
+photocraft-cli run input.png --cmd edit.fill \
+  --params '{"contents":"color","color":"#112233","preserveTransparency":true}' \
+  --out recolored.png
+
+# Trim transparent margins; inspect the result before calculating any padding.
+photocraft-cli run input.png --cmd image.trim \
+  --params '{"basedOn":"transparent"}' --out trimmed.png
+photocraft-cli info trimmed.png --compact
+```
+
+For 12-pixel padding, new width/height are trimmed width/height plus 24. For a padded square, both dimensions are `max(trimmed width, trimmed height) + 24`. Use `image.canvasSize` with those computed pixel dimensions, `anchor:"center"`, and `extensionColor:"transparent"`; do not guess values from a scaled preview.
+
+Live tests on CLI 0.8.2 cover dimensions/alpha after trim, alpha-preserving fill, exact-color contiguous bucket fill, global black-to-alpha, and enclosed-region preservation after Magic Wand/clear. These are focused fixtures, not proof of equivalence for arbitrary feathering, profiles, anti-aliasing, animation, or layered backgrounds. Keep originals and inspect real-image exports.
+
 ## Batch actions
 
 Save a reviewed JSON action list, for example `grade.json`:
