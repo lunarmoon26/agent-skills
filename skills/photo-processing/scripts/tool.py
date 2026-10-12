@@ -5,7 +5,7 @@
 #   "Pillow==12.3.0",
 # ]
 # ///
-"""JSON-in/JSON-out bridge for the photo-processing CLI."""
+"""JSON-in/JSON-out bridge for asset resizing, luminance alpha, and sprite utilities."""
 
 from __future__ import annotations
 
@@ -17,14 +17,9 @@ from contextlib import redirect_stdout
 import photo
 
 COMMANDS = {
-    "flood-fill",
-    "inspect",
-    "key-color",
     "key-luminance",
-    "mask",
     "resize",
     "sprite-grid",
-    "trim",
 }
 
 

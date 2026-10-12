@@ -4,15 +4,15 @@
   "name": "photo-processing",
   "tools": [
     {
-      "title": "Process Photos",
+      "title": "Package Image Assets",
       "name": "photo_process",
-      "description": "Inspect, resize, convert, mask, trim, recolor, flood-fill, or split images with the bundled photo CLI. Pass the documented CLI arguments as separate tokens; no shell is invoked.",
+      "description": "Batch resize and export assets (including multi-size ICO), derive luminance alpha, or split sprite grids with CSS/JSON metadata. Use PhotoCraft for inspection and general editing. Pass CLI arguments as separate tokens; no shell is invoked.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "command": {
             "type": "string",
-            "enum": ["inspect", "resize", "key-color", "flood-fill", "key-luminance", "mask", "trim", "sprite-grid"],
+            "enum": ["resize", "key-luminance", "sprite-grid"],
             "description": "Photo operation to run"
           },
           "arguments": {

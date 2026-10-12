@@ -6,7 +6,7 @@
 # ]
 # ///
 # pyright: reportMissingImports=false
-"""Non-destructive image resizing, transparency, icon, and sprite-sheet tools.
+"""Asset resizing, luminance alpha, and sprite utilities.
 
 Run with the pinned Pillow version supplied by uv:
     uv run --script photo.py --help
@@ -16,9 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import re
-from collections import deque
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
@@ -70,13 +68,6 @@ def nonnegative_int(value: str) -> int:
     result = int(value)
     if result < 0:
         raise argparse.ArgumentTypeError("must be zero or greater")
-    return result
-
-
-def channel_value(value: str) -> int:
-    result = int(value)
-    if not 0 <= result <= 255:
-        raise argparse.ArgumentTypeError("must be between 0 and 255")
     return result
 
 
@@ -289,101 +280,6 @@ def command_resize(args: argparse.Namespace) -> None:
             print(f"{source} -> {destination} ({resized.width}x{resized.height}, {image_format})")
 
 
-def replace_alpha(image: Image.Image, alpha_values: Iterable[int]) -> Image.Image:
-    output = image.convert("RGBA")
-    alpha = Image.new("L", output.size)
-    alpha.putdata(alpha_values)
-    output.putalpha(alpha)
-    return output
-
-
-def key_color(
-    image: Image.Image,
-    color: tuple[int, int, int, int],
-    tolerance: float,
-    feather: float,
-) -> Image.Image:
-    if tolerance > math.sqrt(3 * 255**2):
-        raise ValueError("--tolerance cannot exceed 441.67")
-    source = image.convert("RGBA")
-    red, green, blue, _ = color
-    alpha_values: list[int] = []
-    for pixel_red, pixel_green, pixel_blue, pixel_alpha in source.get_flattened_data():
-        distance = math.dist((pixel_red, pixel_green, pixel_blue), (red, green, blue))
-        if distance <= tolerance:
-            multiplier = 0.0
-        elif feather and distance < tolerance + feather:
-            multiplier = (distance - tolerance) / feather
-        else:
-            multiplier = 1.0
-        alpha_values.append(round(pixel_alpha * multiplier))
-    return replace_alpha(source, alpha_values)
-
-
-def flood_fill_color(
-    image: Image.Image,
-    seed_x: int,
-    seed_y: int,
-    color: tuple[int, int, int, int],
-    tolerance: int,
-    alpha_mode: str,
-    connectivity: int,
-) -> tuple[Image.Image, int]:
-    """Replace the seed-connected color region and return its pixel count.
-
-    Matching is always measured against the original seed color, preventing
-    the gradual color drift that occurs when each neighbor is compared with
-    the previously visited pixel.
-    """
-    source = image.convert("RGBA")
-    width, height = source.size
-    if not 0 <= seed_x < width or not 0 <= seed_y < height:
-        raise ValueError(f"seed ({seed_x}, {seed_y}) is outside the {width}x{height} image")
-    if alpha_mode not in {"ignore", "match"}:
-        raise ValueError("--alpha-mode must be ignore or match")
-    if connectivity not in {4, 8}:
-        raise ValueError("--connectivity must be 4 or 8")
-
-    pixels = source.load()
-    seed = pixels[seed_x, seed_y]
-    channel_count = 4 if alpha_mode == "match" else 3
-    selected = bytearray(width * height)
-    queue: deque[int] = deque()
-
-    def matches(pixel: tuple[int, int, int, int]) -> bool:
-        return all(abs(pixel[channel] - seed[channel]) <= tolerance for channel in range(channel_count))
-
-    def enqueue(x: int, y: int) -> bool:
-        index = y * width + x
-        if selected[index] or not matches(pixels[x, y]):
-            return False
-        selected[index] = 1
-        pixels[x, y] = color
-        queue.append(index)
-        return True
-
-    enqueue(seed_x, seed_y)
-    selected_count = 1
-    while queue:
-        index = queue.popleft()
-        x = index % width
-        y = index // width
-        for offset_y in (-1, 0, 1):
-            next_y = y + offset_y
-            if not 0 <= next_y < height:
-                continue
-            for offset_x in (-1, 0, 1):
-                if offset_x == 0 and offset_y == 0:
-                    continue
-                if connectivity == 4 and offset_x != 0 and offset_y != 0:
-                    continue
-                next_x = x + offset_x
-                if 0 <= next_x < width and enqueue(next_x, next_y):
-                    selected_count += 1
-
-    return source, selected_count
-
-
 def srgb_to_linear(channel: int) -> float:
     value = channel / 255
     return value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
@@ -442,27 +338,6 @@ def luminance_alpha(
     return output
 
 
-def mask_image(image: Image.Image, color: tuple[int, int, int, int], alpha_source: str, opacity: float) -> Image.Image:
-    source = image.convert("RGBA")
-    original_alpha = source.getchannel("A")
-    if alpha_source == "alpha":
-        alpha = original_alpha
-    else:
-        luminance = source.convert("L")
-        if alpha_source == "inverse-luminance":
-            luminance = ImageOps.invert(luminance)
-        alpha = Image.new("L", source.size)
-        alpha.putdata(
-            [round(value * existing / 255) for value, existing in zip(luminance.get_flattened_data(), original_alpha.get_flattened_data())]
-        )
-    color_alpha = color[3] / 255 * opacity
-    if color_alpha != 1:
-        alpha = alpha.point(lambda value: round(value * color_alpha))
-    output = Image.new("RGBA", source.size, color[:3] + (0,))
-    output.putalpha(alpha)
-    return output
-
-
 def trim_image(image: Image.Image, padding: int, square: bool) -> Image.Image:
     source = image.convert("RGBA")
     bounds = source.getchannel("A").getbbox()
@@ -505,33 +380,6 @@ def process_transform(
         print(f"{source} -> {destination} ({output.width}x{output.height}, {image_format})")
 
 
-def command_key_color(args: argparse.Namespace) -> None:
-    process_transform(args, lambda image: key_color(image, args.color, args.tolerance, args.feather))
-
-
-def command_flood_fill(args: argparse.Namespace) -> None:
-    sources = collect_sources(args.inputs, args.recursive)
-    if args.output is not None and len(sources) != 1:
-        raise ValueError("--output requires exactly one source")
-    for source in sources:
-        destination, image_format = destination_for_transform(source, args)
-        verify_destination(source, destination, args.overwrite)
-        output, selected_count = flood_fill_color(
-            load_image(source, args.first_frame),
-            args.x,
-            args.y,
-            args.color,
-            args.tolerance,
-            args.alpha_mode,
-            args.connectivity,
-        )
-        save_image(output, destination, image_format, args.quality, args.background, args.ico_sizes)
-        print(
-            f"{source} -> {destination} ({output.width}x{output.height}, {image_format}; "
-            f"filled {selected_count} pixels)"
-        )
-
-
 def command_key_luminance(args: argparse.Namespace) -> None:
     process_transform(
         args,
@@ -545,14 +393,6 @@ def command_key_luminance(args: argparse.Namespace) -> None:
             args.alpha_floor,
         ),
     )
-
-
-def command_mask(args: argparse.Namespace) -> None:
-    process_transform(args, lambda image: mask_image(image, args.color, args.alpha_source, args.opacity))
-
-
-def command_trim(args: argparse.Namespace) -> None:
-    process_transform(args, lambda image: trim_image(image, args.padding, args.square))
 
 
 def slugify(value: str) -> str:
@@ -706,23 +546,6 @@ def command_sprite_grid(args: argparse.Namespace) -> None:
         print(f"preview -> {args.preview}")
 
 
-def command_inspect(args: argparse.Namespace) -> None:
-    for source in collect_sources(args.inputs, args.recursive):
-        with Image.open(source) as image:
-            print(
-                json.dumps(
-                    {
-                        "path": str(source),
-                        "format": image.format,
-                        "size": image.size,
-                        "mode": image.mode,
-                        "frames": getattr(image, "n_frames", 1),
-                        "hasAlpha": "A" in image.getbands() or "transparency" in image.info,
-                    }
-                )
-            )
-
-
 def add_common_input(parser: argparse.ArgumentParser, multiple: bool = True) -> None:
     parser.add_argument("inputs" if multiple else "input", nargs="+" if multiple else None, type=Path, help="Image file(s), or directories of image files.")
     if multiple:
@@ -759,10 +582,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    inspect_parser = subparsers.add_parser("inspect", help="Print image dimensions, mode, format, and frame count as JSON.")
-    add_common_input(inspect_parser)
-    inspect_parser.set_defaults(handler=command_inspect)
-
     resize_parser = subparsers.add_parser("resize", help="Resize, convert, pad, and batch-export static images.")
     add_common_input(resize_parser)
     resize_parser.add_argument("--width", type=positive_int, help="Target width in pixels.")
@@ -780,49 +599,6 @@ def build_parser() -> argparse.ArgumentParser:
     resize_parser.add_argument("--ico-sizes", default="16,32,48,64,128,256", help="Comma-separated square sizes for ICO output.")
     resize_parser.add_argument("--overwrite", action="store_true", help="Replace existing output files.")
     resize_parser.set_defaults(handler=command_resize)
-
-    key_color_parser = subparsers.add_parser("key-color", help="Make a chosen background color transparent.")
-    add_common_input(key_color_parser)
-    key_color_parser.add_argument("--color", type=parse_color, required=True, help="Background color to remove, such as #000000 or 0,0,0.")
-    key_color_parser.add_argument("--tolerance", type=nonnegative_float, default=0, help="RGB distance removed completely. Default: 0.")
-    key_color_parser.add_argument("--feather", type=nonnegative_float, default=0, help="Additional RGB-distance band faded to opaque. Default: 0.")
-    add_output_options(key_color_parser, "-keyed")
-    key_color_parser.set_defaults(handler=command_key_color)
-
-    flood_fill_parser = subparsers.add_parser(
-        "flood-fill",
-        help="Replace a contiguous seed-connected color region, similar to Magic Wand with Contiguous enabled.",
-    )
-    add_common_input(flood_fill_parser)
-    flood_fill_parser.add_argument("--x", type=nonnegative_int, required=True, help="Seed X coordinate in source pixels.")
-    flood_fill_parser.add_argument("--y", type=nonnegative_int, required=True, help="Seed Y coordinate in source pixels.")
-    flood_fill_parser.add_argument(
-        "--color",
-        type=parse_color,
-        required=True,
-        help="Replacement RGBA color, such as #ff00ffff or #00000000 for transparent.",
-    )
-    flood_fill_parser.add_argument(
-        "--tolerance",
-        type=channel_value,
-        default=0,
-        help="Allowed difference above or below each sampled channel, from 0 to 255. Default: 0.",
-    )
-    flood_fill_parser.add_argument(
-        "--alpha-mode",
-        choices=("match", "ignore"),
-        default="match",
-        help="match includes alpha in tolerance checks; ignore compares RGB only. Default: match.",
-    )
-    flood_fill_parser.add_argument(
-        "--connectivity",
-        type=int,
-        choices=(4, 8),
-        default=8,
-        help="Treat edge-sharing pixels (4) or edge/diagonal-sharing pixels (8) as contiguous. Default: 8.",
-    )
-    add_output_options(flood_fill_parser, "-filled")
-    flood_fill_parser.set_defaults(handler=command_flood_fill)
 
     key_luminance_parser = subparsers.add_parser("key-luminance", help="Derive transparency from perceived brightness; useful for dark backdrops.")
     add_common_input(key_luminance_parser)
@@ -847,21 +623,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_output_options(key_luminance_parser, "-luma-keyed")
     key_luminance_parser.set_defaults(handler=command_key_luminance)
-
-    mask_parser = subparsers.add_parser("mask", help="Render an image silhouette in one solid color.")
-    add_common_input(mask_parser)
-    mask_parser.add_argument("--color", type=parse_color, required=True, help="Output color, such as #72ffff.")
-    mask_parser.add_argument("--alpha-source", choices=("alpha", "luminance", "inverse-luminance"), default="alpha", help="Use existing transparency, brightness, or inverted brightness as the icon mask.")
-    mask_parser.add_argument("--opacity", type=float, default=1.0, help="Final opacity from 0 to 1. Default: 1.")
-    add_output_options(mask_parser, "-masked")
-    mask_parser.set_defaults(handler=command_mask)
-
-    trim_parser = subparsers.add_parser("trim", help="Crop transparent margins and optionally create padded square icons.")
-    add_common_input(trim_parser)
-    trim_parser.add_argument("--padding", type=nonnegative_int, default=0, help="Transparent padding after trimming. Default: 0.")
-    trim_parser.add_argument("--square", action="store_true", help="Center the trimmed result in a square canvas.")
-    add_output_options(trim_parser, "-trimmed")
-    trim_parser.set_defaults(handler=command_trim)
 
     sprite_parser = subparsers.add_parser("sprite-grid", help="Cut a regular icon grid and emit crop offsets, metadata, CSS, and a guide image.")
     add_common_input(sprite_parser, multiple=False)
@@ -902,8 +663,6 @@ def main() -> None:
     args = parser.parse_args()
     if hasattr(args, "quality") and not 1 <= args.quality <= 100:
         parser.error("--quality must be between 1 and 100")
-    if hasattr(args, "opacity") and not 0 <= args.opacity <= 1:
-        parser.error("--opacity must be between 0 and 1")
     if hasattr(args, "css_scale") and args.css_scale <= 0:
         parser.error("--css-scale must be positive")
     try:

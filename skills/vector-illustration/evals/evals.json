@@ -30,6 +30,12 @@
       "prompt": "Change the blue outline of this SVG icon to red. Preserve its geometry and IDs.",
       "expected_output": "Makes a targeted source-level stroke edit, preserves viewBox/path/ID, avoids a VectorCraft round trip for a one-attribute edit, and renders/checks the result when a viewer is available.",
       "files": ["tests/fixtures/mountains.svg"]
+    },
+    {
+      "id": 6,
+      "prompt": "My color-traced cel-animation SVG looks patched across soft shaded armor. How would you smooth it without losing outlines, lettering, or hard shadow edges? No files are attached; explain the workflow and its limits.",
+      "expected_output": "Distinguishes quantization patches from jagged contours and anti-aliasing seams. Requests actual source/SVG before measured edits; recommends bounded bilateral preprocessing trials when the original exists and selective gradient-filled surface reconstruction for genuine smooth shading. Preserves intentional cel boundaries, holes, thin detail and overlap order. Does not claim simplification, extra colors, seam strokes or blanket Gaussian blur will recover gradients; reports filter/export tradeoffs and compares final renders against the original.",
+      "files": []
     }
   ]
 }
