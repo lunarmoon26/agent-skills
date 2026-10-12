@@ -16,6 +16,7 @@ Create editable vector artwork, not a raster image wrapped in an SVG. Preserve e
 | Rich illustration, multiple artboards, path booleans, live appearance/effects, or native editable master | VectorCraft; see [CLI workflow](references/vectorcraft.md) |
 | Scenic/neon posters, ribbons, mandalas, warped type, mesh shading, or perspective scenes | [Example-derived scenarios](references/scenarios.md), then discover the installed command schemas |
 | Recreate an image faithfully as editable vector art | [Reference reconstruction](references/reconstruction.md); measure and compare before adding detail |
+| Patchy traced colors, posterization, jagged paths, or seams | [Smoothing and surface reconstruction](references/smoothing.md); distinguish shading from contour cleanup |
 | Persistent object/selection state or live app collaboration | VectorCraft's own MCP server, with authorized read/write roots |
 | Photo retouching, PSD layering, pixel masks, sprite cutting | `photo-processing`, not this skill |
 

@@ -129,6 +129,21 @@ Use the annotated `--preview` to adjust origin, cell size, and gaps before commi
 
 ## Working Rules
 
+### Edge-preserving preparation for vector tracing
+
+For noisy flat surfaces, use the optional `scripts/trace_prepare.py` helper to write a separate bilateral-filtered PNG candidate:
+
+```sh
+uv run --script /absolute/path/to/photo-processing/scripts/trace_prepare.py \
+  reference.png prepared.png --diameter 5 --sigma-color 20 --sigma-space 3
+```
+
+Requires `uv`, Python 3.11–3.14, pinned Pillow and OpenCV (PEP 723 dependencies, downloaded on first use); it is not exposed by `photo_process`. It preserves EXIF-oriented dimensions, never replaces the source or existing outputs, and rejects animation, non-opaque alpha, and ICC-tagged input. Output is untagged RGB PNG; the parent directory must exist. Prepare a controlled sRGB input first when color profiles matter. Failures exit nonzero; an interrupted write can leave a partial output. Do not use this opaque-only helper on transparent artwork or blur linework indiscriminately.
+
+Filtering can reduce tracing speckles but cannot reconstruct gradients from flat-color SVG patches. Compare the final vector render with the original; preserve weak detail and intentional cel shading. See the vector-illustration skill's `references/smoothing.md` for diagnosis, bounded retracing, gradient reconstruction, and filter-export tradeoffs.
+
+### Output safety
+
 - Keep source assets unchanged. Write outputs beside the source with a suffix or into a project asset directory.
 - PhotoCraft's raw CLI can replace existing destinations without confirmation, and engine commands/actions can write paths beyond `--out`. Review all commands, parameters, actions, and destinations first. The bridge is not a filesystem sandbox or an overwrite guard.
 - Use PNG, WebP, or AVIF when subsequent steps need transparency. JPEG/BMP exports flatten alpha onto `--background` (white by default).

@@ -56,6 +56,8 @@ Make a short mismatch list and address the highest-impact item each iteration. S
 
 ## Automatic tracing: optional baseline, not the endpoint
 
+For patchy color traces, follow [smoothing and surface reconstruction](smoothing.md). Preprocessing can reduce speckles; continuous shading needs gradient-filled surfaces rather than more flat-color fragments. State whether the result is automatic vectorization, clean illustration, or faithful reconstruction.
+
 Discover `imageTrace.presets`, `imageTrace.make`, `imageTrace.makeAndExpand`, `imageTrace.expand`, and the image-placement command in the installed catalogue. Inspect returned image IDs and use explicit targeting; do not invent a CLI `trace` subcommand.
 
 Color tracing is useful for flat regions; black-and-white tracing is useful for clean line art. Logo mode is restricted to flat-color logos and is not a generic mode for animation frames or photos. Limit colors/noise deliberately, inspect fitted curves and small holes, and clean up paths/groups. A live Image Trace can retain its raster source; expand and audit delivery before claiming vector-only. Keep a native working copy before irreversible expansion. Judge against the reference, not by path count.
