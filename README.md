@@ -47,5 +47,6 @@ the layout documented by the official Agent Skills evaluation guide.
 - `vector-illustration`
 - `research-driven-development`
 - `tech-breakdown-in-chinese`
+- `privacy-guard` — local privacy checks and approved redaction for code, articles, blogs, and forum payloads; optional offline Rampart detector
 
 Each skill lives in `skills/<skill-name>/`, with scripts, references, tests, or eval fixtures where needed.
